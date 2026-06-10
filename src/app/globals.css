@@ -1,0 +1,55 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --paper-grain: radial-gradient(1200px 600px at 20% 0%, rgba(214,168,79,0.08), transparent 60%),
+                 radial-gradient(800px 400px at 90% 80%, rgba(46,111,115,0.10), transparent 60%);
+}
+
+html, body {
+  background: #0c1322;
+  color: #F7F1E3;
+  font-family: var(--font-sora), system-ui, sans-serif;
+}
+
+body {
+  background-image: var(--paper-grain), linear-gradient(180deg, #0c1322 0%, #111827 60%, #172033 100%);
+  background-attachment: fixed;
+}
+
+.stamp {
+  font-family: var(--font-marcellus), serif;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  border: 2px solid currentColor;
+  padding: 0.4rem 0.9rem;
+  border-radius: 4px;
+  transform: rotate(-2deg);
+  display: inline-block;
+}
+
+.paper {
+  background: linear-gradient(180deg, #F7F1E3 0%, #ece4cf 100%);
+  color: #111111;
+  border: 1px solid rgba(17,17,17,0.10);
+  box-shadow: 0 1px 0 rgba(255,255,255,0.6) inset, 0 12px 30px -16px rgba(0,0,0,0.5);
+}
+
+.boarding {
+  background: repeating-linear-gradient(
+    90deg,
+    rgba(214,168,79,0.10) 0 6px,
+    transparent 6px 14px
+  ), #172033;
+  border: 1px solid rgba(214,168,79,0.3);
+}
+
+.mono { font-family: var(--font-mono), monospace; }
+
+.gate-pass { color: #2F8F68; }
+.gate-fail { color: #D94A38; }
+.gate-partial { color: #D6A84F; }
+.gate-unclear { color: #5F6874; }
+
+.hairline { border-top: 1px dashed rgba(214,168,79,0.35); }
