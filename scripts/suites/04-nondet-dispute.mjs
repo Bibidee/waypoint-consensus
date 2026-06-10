@@ -1,4 +1,4 @@
-// Suite 04 — dispute review non-deterministic.
+// Suite 04 - dispute review non-deterministic.
 // Builds + judges a fresh claim, then test_wallet_2 opens a dispute, runs review_dispute.
 import {
   makeClient, makeReadClient, writeOrThrow, readOrThrow, parseJsonReadResult,
@@ -39,7 +39,7 @@ export default async function suite04() {
   const claimAfterOpen = parseJsonReadResult(await readOrThrow({ client: read, functionName: "get_claim", args: [claimId] }));
   assertEq(claimAfterOpen.status, "DISPUTED", "claim status should be DISPUTED after open_dispute");
 
-  console.log("   …review_dispute — this can take a few minutes…");
+  console.log("   …review_dispute - this can take a few minutes…");
   await writeOrThrow({ client: w2.client, functionName: "review_dispute", args: [disputeId], label: "review_dispute", attempts: 2 });
 
   const dr = parseJsonReadResult(await readOrThrow({ client: read, functionName: "get_dispute_review", args: [disputeId] }));

@@ -8,7 +8,7 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
-const MAX_PER_RUN = 1; // judge_claim is slow + nondeterministic — keep batches tiny.
+const MAX_PER_RUN = 1; // judge_claim is slow + nondeterministic - keep batches tiny.
 
 export async function POST(req: Request) {
   if (!verifyKeeperAuth(req.headers.get("authorization"))) {

@@ -94,7 +94,7 @@ export async function listAllClaimIds(client: any, address: `0x${string}`): Prom
 }
 
 /**
- * Fire-and-forget judge_claim. We do NOT await consensus inside the API route —
+ * Fire-and-forget judge_claim. We do NOT await consensus inside the API route -
  * Vercel serverless functions time out at 10s (Hobby) or 60s (Pro) and GenLayer
  * nondet consensus often takes 30s+. We submit the tx, return the hash, and let
  * the chain finish asynchronously. cron-job.org will skip the claim on its next

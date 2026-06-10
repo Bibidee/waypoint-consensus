@@ -22,7 +22,7 @@ export default function Providers({ children }: { children: ReactNode }) {
     return (
       <>
         <div className="border-b border-vermilion/40 bg-vermilion/10 text-vermilion text-xs px-6 py-2 mono uppercase tracking-[0.2em]">
-          Privy not configured — set NEXT_PUBLIC_PRIVY_APP_ID in .env.local to enable sign-in.
+          Privy not configured - set NEXT_PUBLIC_PRIVY_APP_ID in .env.local to enable sign-in.
         </div>
         <ToastProvider>{children}</ToastProvider>
       </>

@@ -40,7 +40,7 @@ export default function WalletPage() {
     return <div className="mono text-paper/60">Redirecting to sign in…</div>;
   }
 
-  // No wallet found — offer creation
+  // No wallet found - offer creation
   if (!embedded) {
     async function onCreate() {
       setCreating(true);
@@ -70,7 +70,7 @@ export default function WalletPage() {
   }
 
   const address = embedded.address;
-  const email = user?.email?.address ?? user?.google?.email ?? "—";
+  const email = user?.email?.address ?? user?.google?.email ?? "-";
 
   async function onCopy() {
     try {
@@ -164,7 +164,7 @@ export default function WalletPage() {
         <div className="mono text-[10px] uppercase tracking-[0.25em] text-stamped/60">Session</div>
         <h2 className="font-display text-2xl mt-1">Sign out</h2>
         <p className="text-stamped/70 text-sm mt-2">
-          Signs you out of Privy on this device. Your wallet is not deleted — sign back in to access it again.
+          Signs you out of Privy on this device. Your wallet is not deleted - sign back in to access it again.
         </p>
         <button
           onClick={onLogout}
@@ -200,7 +200,7 @@ export default function WalletPage() {
             onClick={onExportConfirm}
             className="bg-vermilion text-cloud mono uppercase text-[11px] tracking-[0.25em] px-4 py-2 rounded"
           >
-            I understand — show key
+            I understand - show key
           </button>
         </div>
       </Modal>

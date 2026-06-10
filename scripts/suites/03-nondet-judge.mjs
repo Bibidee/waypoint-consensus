@@ -1,4 +1,4 @@
-// Suite 03 — judge_claim non-deterministic.
+// Suite 03 - judge_claim non-deterministic.
 // Builds a fresh covered claim, calls judge_claim, validates the bounded review.
 import {
   makeClient, makeReadClient, writeOrThrow, readOrThrow, parseJsonReadResult,
@@ -82,7 +82,7 @@ export default async function suite03() {
   });
 
   // === The actual nondet call ===
-  console.log("   …calling judge_claim — this can take a few minutes for consensus…");
+  console.log("   …calling judge_claim - this can take a few minutes for consensus…");
   await writeOrThrow({
     client, functionName: "judge_claim", args: [claimId], label: "judge_claim",
     attempts: 2,

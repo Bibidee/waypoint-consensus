@@ -1,4 +1,4 @@
-// Suite 06 — interpret_policy_gate per-gate non-deterministic.
+// Suite 06 - interpret_policy_gate per-gate non-deterministic.
 import {
   makeClient, makeReadClient, writeOrThrow, readOrThrow, parseJsonReadResult,
   nowId, assert, assertOneOf,

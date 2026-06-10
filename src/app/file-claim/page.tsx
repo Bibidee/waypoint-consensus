@@ -86,7 +86,7 @@ export default function FileClaimPage() {
     <div className="max-w-3xl mx-auto">
       <div className="mono text-[11px] uppercase tracking-[0.3em] text-gold/70">Passport Desk</div>
       <h1 className="font-display text-4xl text-paper">File a Waypoint File</h1>
-      <p className="text-paper/70 mt-2">Stamped pages — each section becomes part of the on-chain travel case.</p>
+      <p className="text-paper/70 mt-2">Stamped pages - each section becomes part of the on-chain travel case.</p>
 
       <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-6">
         <Section title="Policy">
@@ -94,7 +94,7 @@ export default function FileClaimPage() {
             <p className="text-stamped/70 text-sm">No policies in the Vault yet. <a href="/policies" className="text-burgundy underline">Add a policy first.</a></p>
           ) : (
             <select {...register("policyId")} className="w-full bg-cloud border border-stamped/30 rounded px-3 py-2 mono text-sm">
-              <option value="">— Select policy —</option>
+              <option value="">- Select policy -</option>
               {policies.map(p => <option key={p} value={p}>{p}</option>)}
             </select>
           )}
@@ -114,7 +114,7 @@ export default function FileClaimPage() {
         <Section title="Incident">
           <Field label="Claim Type">
             <select {...register("claimType")} className="input">
-              <option value="">— Select —</option>
+              <option value="">- Select -</option>
               {claimTypes.map(t => <option key={t} value={t}>{t.replace(/_/g," ")}</option>)}
             </select>
           </Field>

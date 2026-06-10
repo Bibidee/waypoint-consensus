@@ -80,7 +80,7 @@ function SignInInner() {
         <div className="mono text-[11px] uppercase tracking-[0.3em] text-gold/80">Passport Control</div>
         <h1 className="font-display text-5xl mt-3 text-paper">Sign in.</h1>
         <p className="text-paper/75 mt-3 max-w-md">
-          Waypoint Consensus uses passwordless sign-in. Enter your email — we send a one-time code. No password, no recovery flow.
+          Waypoint Consensus uses passwordless sign-in. Enter your email - we send a one-time code. No password, no recovery flow.
         </p>
         <p className="text-paper/60 mt-3 text-sm max-w-md">
           On first sign-in we create your embedded EVM wallet automatically. It signs every claim, evidence, and consensus action on Studionet.
@@ -124,7 +124,7 @@ function SignInInner() {
             </button>
 
             <p className="text-stamped/55 text-xs mt-3">
-              No passwords. No "forgot password" — your email inbox is the recovery channel.
+              No passwords. No "forgot password" - your email inbox is the recovery channel.
             </p>
           </form>
         ) : (

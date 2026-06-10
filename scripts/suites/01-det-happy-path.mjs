@@ -1,4 +1,4 @@
-// Suite 01 — deterministic happy path.
+// Suite 01 - deterministic happy path.
 // Walks policy → file_claim → add_evidence → set_claim_timeline,
 // reading state back after each write.
 import {
@@ -63,7 +63,7 @@ export default async function suite01() {
   // 3. add_evidence
   const evidencePayload = {
     type: "AIRLINE_NOTICE",
-    title: "9-hour Delay Notice — DL220",
+    title: "9-hour Delay Notice - DL220",
     uri: "https://delta.com/notice/DL220-delay",
     source: "Delta Air Lines",
     issuedAt: "2026-06-05T10:00",

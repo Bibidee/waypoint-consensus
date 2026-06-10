@@ -12,7 +12,7 @@ const sora = Sora({ subsets: ["latin"], variable: "--font-sora" });
 const mono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono" });
 
 export const metadata: Metadata = {
-  title: "Waypoint Consensus — Travel claims judged by evidence, policy, and consensus.",
+  title: "Waypoint Consensus - Travel claims judged by evidence, policy, and consensus.",
   description: "GenLayer-powered travel insurance claim judgement layer.",
 };
 

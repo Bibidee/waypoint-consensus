@@ -1,4 +1,4 @@
-// Suite 05 — detect_evidence_conflicts non-deterministic.
+// Suite 05 - detect_evidence_conflicts non-deterministic.
 import {
   makeClient, makeReadClient, writeOrThrow, readOrThrow, parseJsonReadResult,
   nowId, assert, assertOneOf,
@@ -17,7 +17,7 @@ export default async function suite05() {
   await writeOrThrow({ client, functionName: "file_claim", args: [claimId, policyId, JSON.stringify({ claimType: "FLIGHT_DELAY", route: { from: "A", to: "B" }, provider: "X", bookingReference: "BK", incidentDate: "2026-06-01", claimedAmount: 500, currency: "USD", explanation: "9h delay" })] });
   await writeOrThrow({ client, functionName: "add_evidence", args: [nowId("ev"), claimId, JSON.stringify({ type: "AIRLINE_NOTICE", title: "delay 9h", uri: "x", source: "Delta", description: "delay 9h confirmed", privacy: "PUBLIC" })] });
 
-  console.log("   …detect_evidence_conflicts — non-deterministic…");
+  console.log("   …detect_evidence_conflicts - non-deterministic…");
   await writeOrThrow({ client, functionName: "detect_evidence_conflicts", args: [claimId], label: "detect_evidence_conflicts", attempts: 2 });
 
   const review = parseJsonReadResult(await readOrThrow({ client: read, functionName: "get_claim_review", args: [claimId] }));

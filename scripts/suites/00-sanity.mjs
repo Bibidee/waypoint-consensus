@@ -1,4 +1,4 @@
-// Suite 00 — Step 0 sanity. Verify RPC reachable, all wallets have balance,
+// Suite 00 - Step 0 sanity. Verify RPC reachable, all wallets have balance,
 // contract reads work. Aborts the whole suite if anything's wrong.
 import {
   makeClient, makeReadClient, readOrThrow, parseJsonReadResult,
@@ -26,7 +26,7 @@ export default async function suite00() {
     assert(typeof stats[k] === "number", `protocol stats missing counter "${k}"`);
   }
 
-  // Wallets — addresses + balances
+  // Wallets - addresses + balances
   const balances = {};
   for (const [envName, label] of WALLETS) {
     if (!process.env[envName]) throw new Error(`Missing ${envName} in .env.local`);
@@ -41,7 +41,7 @@ export default async function suite00() {
     balances[label] = { address, balance: bal !== null ? bal.toString() : "unknown" };
     console.log(`wallet ${label}: ${address}  balance=${balances[label].balance}`);
     if (bal !== null && bal === 0n) {
-      throw new Error(`Wallet ${label} (${address}) has zero balance — fund it on Studionet before running the suite.`);
+      throw new Error(`Wallet ${label} (${address}) has zero balance - fund it on Studionet before running the suite.`);
     }
   }
 

@@ -35,7 +35,7 @@ export default function AddEvidencePage() {
       <p className="text-paper/70 text-sm mt-1">Only submit information you are comfortable making available for review. Use hashes/CIDs for sensitive files.</p>
 
       <form onSubmit={handleSubmit(onSubmit)} className="paper rounded-md p-5 mt-6 space-y-3">
-        <input {...register("title", { required: true })} placeholder="Title (e.g. 9hr Delay Notice — DL220)" className="input" />
+        <input {...register("title", { required: true })} placeholder="Title (e.g. 9hr Delay Notice - DL220)" className="input" />
         <div className="grid grid-cols-2 gap-3">
           <select {...register("type")} className="input">{TYPES.map(t=><option key={t} value={t}>{t.replace(/_/g," ")}</option>)}</select>
           <select {...register("privacy")} className="input">{PRIVACY.map(t=><option key={t} value={t}>{t.replace(/_/g," ")}</option>)}</select>

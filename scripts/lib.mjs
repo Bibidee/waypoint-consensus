@@ -1,5 +1,5 @@
 // Shared helpers for the e2e suite.
-// Reads env from process.env only — never hardcoded, never echoed, never committed.
+// Reads env from process.env only - never hardcoded, never echoed, never committed.
 import fs from "node:fs";
 import path from "node:path";
 
@@ -74,7 +74,7 @@ const sleep = (ms) => new Promise(r => setTimeout(r, ms));
  *   2. Waits for ACCEPTED via waitForTransactionReceipt
  *   3. Reads the full transaction back via getTransaction
  *   4. Inspects receipt.consensus_data.leader_receipt[0].execution_result
- *      — anything other than SUCCESS / ACCEPTED is treated as failure, with
+ *      - anything other than SUCCESS / ACCEPTED is treated as failure, with
  *      the last 2 lines of stderr surfaced as the error message.
  */
 export async function writeOrThrow({ client, functionName, args, label, attempts = 5, backoffMs = 12000 }) {
@@ -122,7 +122,7 @@ export async function writeOrThrow({ client, functionName, args, label, attempts
     } catch (e) {
       lastErr = e;
       const ms = Date.now() - t0;
-      // If we got an on-chain failure (e.txHash set), don't retry — it'll just fail the same way.
+      // If we got an on-chain failure (e.txHash set), don't retry - it'll just fail the same way.
       if (e?.txHash) {
         console.log(`   ✗ ${functionName} on-chain failure (${ms}ms): ${e.message}`);
         throw e;
@@ -160,7 +160,7 @@ export async function writeExpectRevert({ client, functionName, args, label, att
         interval: 3000,
         fullTransaction: false,
       });
-    } catch { /* tolerate — receipt may surface failure */ }
+    } catch { /* tolerate - receipt may surface failure */ }
     tx = await client.getTransaction({ hash: txHash });
     const execStatus = pickExecutionStatus(tx);
     if (execStatus && isOkStatus(execStatus)) {
@@ -227,7 +227,7 @@ function pickStderrTail(tx) {
 }
 
 function isOkStatus(s) {
-  if (!s) return true; // unknown — treat as ok
+  if (!s) return true; // unknown - treat as ok
   const u = String(s).toUpperCase();
   return u === "SUCCESS" || u === "ACCEPTED" || u === "FINISHED" || u === "FINISHED_OK";
 }

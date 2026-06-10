@@ -66,7 +66,7 @@ export default function ClaimsPage() {
               <span className="col-span-3 mono text-xs text-paper">{c.claimType?.replace(/_/g," ")}</span>
               <span className="col-span-3 mono text-xs text-paper/80">{c.route?.from} → {c.route?.to}</span>
               <span className="col-span-2 mono text-xs text-paper/70">{c.incidentDate}</span>
-              <span className="col-span-2 mono text-xs text-paper/60 truncate">{c.policyId || "—"}</span>
+              <span className="col-span-2 mono text-xs text-paper/60 truncate">{c.policyId || "-"}</span>
               <span className="col-span-2 mono text-xs text-right text-gold">{c.status?.replace(/_/g," ")}</span>
             </Link>
           ))}

@@ -82,7 +82,7 @@ export default function ControlBoard() {
           <li key={c.id}>
             <Link href={`/claims/${c.id}`} className="grid grid-cols-12 items-center py-3 gap-3 hover:bg-gold/5 px-2 rounded">
               <span className="col-span-3 mono text-xs text-paper/60 truncate">{(c.claimType ?? "OTHER").replace(/_/g, " ")}</span>
-              <span className="col-span-4 mono text-xs text-paper/80 truncate">{c.route?.from ?? "—"} → {c.route?.to ?? "—"}</span>
+              <span className="col-span-4 mono text-xs text-paper/80 truncate">{c.route?.from ?? "-"} → {c.route?.to ?? "-"}</span>
               <span className="col-span-2 mono text-xs text-paper/60 truncate">{c.id.slice(0, 10)}</span>
               <span className={`col-span-3 mono text-xs text-right tracking-[0.2em] ${statusTone[c.status] ?? "text-paper"}`}>
                 {statusLabel[c.status] ?? c.status}

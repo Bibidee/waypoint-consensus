@@ -1,6 +1,6 @@
 # Waypoint Consensus
 
-Travel claims judged by evidence, policy, and consensus — a GenLayer-powered travel insurance claim judgement layer.
+Travel claims judged by evidence, policy, and consensus - a GenLayer-powered travel insurance claim judgement layer.
 
 ## Setup
 
@@ -13,7 +13,7 @@ npm run dev
 
 ## Contract
 
-Deploy `contracts/WaypointConsensus.py` to GenLayer Studionet (chain 61999). The non-deterministic core lives in `judge_claim`, `review_dispute`, `detect_evidence_conflicts`, and `interpret_policy_gate` — each uses `gl.eq_principle.prompt_comparative` to reach validator consensus on a structured JSON verdict that drives claim state on-chain.
+Deploy `contracts/WaypointConsensus.py` to GenLayer Studionet (chain 61999). The non-deterministic core lives in `judge_claim`, `review_dispute`, `detect_evidence_conflicts`, and `interpret_policy_gate` - each uses `gl.eq_principle.prompt_comparative` to reach validator consensus on a structured JSON verdict that drives claim state on-chain.
 
 ## Flow
 

@@ -175,7 +175,7 @@ export default function ClaimDetail() {
         <h1 className="font-display text-3xl mt-1">{claim.claimType?.replace(/_/g," ")}</h1>
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-4 text-sm">
           <Meta label="Claim ID" value={claim.id} mono />
-          <Meta label="Policy" value={claim.policyId || "—"} mono />
+          <Meta label="Policy" value={claim.policyId || "-"} mono />
           <Meta label="Route" value={`${claim.route?.from} → ${claim.route?.to}`} />
           <Meta label="Incident" value={claim.incidentDate} />
           <Meta label="Provider" value={claim.provider} />
@@ -273,7 +273,7 @@ export default function ClaimDetail() {
                       </span>
                     ))}
                   </div>
-                ) : <div className="text-paper/40 text-xs">—</div>}
+                ) : <div className="text-paper/40 text-xs">-</div>}
               </div>
               <div>
                 <div className="mono text-[10px] uppercase tracking-[0.25em] text-paper/60 mb-1">Payout</div>
@@ -370,7 +370,7 @@ function List({ title, items }: { title: string; items?: string[] }) {
   return (
     <div>
       <div className="mono text-[10px] uppercase tracking-[0.2em] text-paper/60">{title}</div>
-      {!items || items.length === 0 ? <div className="text-paper/40 text-xs">—</div> :
+      {!items || items.length === 0 ? <div className="text-paper/40 text-xs">-</div> :
         <ul className="text-sm text-paper/80 list-disc pl-4">{items.map((s, i) => <li key={i}>{s}</li>)}</ul>}
     </div>
   );
@@ -379,7 +379,7 @@ function DList({ title, items, tone }: { title: string; items?: string[]; tone: 
   return (
     <div>
       <div className={`mono text-[10px] uppercase tracking-[0.2em] ${tone === "signal" ? "text-signal" : "text-vermilion"}`}>{title}</div>
-      {!items || items.length === 0 ? <div className="text-stamped/40 text-xs">—</div> :
+      {!items || items.length === 0 ? <div className="text-stamped/40 text-xs">-</div> :
         <ul className="text-sm text-stamped/80 list-disc pl-4">{items.map((s, i) => <li key={i}>{s}</li>)}</ul>}
     </div>
   );
