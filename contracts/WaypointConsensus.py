@@ -1,10 +1,12 @@
-# v0.2.17
+# v0.2.17 
 # { "Depends": "py-genlayer:1jb45aa8ynh2a9c9xn3b7qqh8sm5q93hwfp7jqmwsfhh8jpz09h6" }
 
 from genlayer import *
-from genlayer.errors import VmUserError
 import json
 import typing
+
+VmUserError = gl.vm.UserError
+
 ALLOWED_DECISIONS = {
     "APPROVED",
     "PARTIALLY_APPROVED",
@@ -283,85 +285,40 @@ class WaypointConsensus(gl.Contract):
         evidence_raw = self.claim_evidence.get(claim_id, "[]")
         timeline_raw = self.claim_timelines.get(claim_id, "[]")
         claimed_amount = self._get_claimed_amount(claim)
-        prompt = f"""You are a travel insurance claim review panel.
-Your job is to produce a STABLE CONSENSUS VERDICT.
-Do not write a full insurance report.
-Do not include long prose.
-Do not include exact confidence scores.
-Do not include exact custom payout amounts.
-Do not include timestamps.
-Do not include model names.
-Do not invent enum values.
-Return strict JSON only.
-The output must be easy for multiple validators to agree on.
-Allowed decision values:
-APPROVED, PARTIALLY_APPROVED, REJECTED, NEEDS_MORE_EVIDENCE, ESCALATE
-Allowed coverage_status values:
-COVERED, COVERED_WITH_LIMITS, NOT_COVERED, UNCLEAR, EXCLUDED
-Allowed confidence_band values:
-LOW, MEDIUM, HIGH
-Allowed risk_level values:
-LOW, MEDIUM, HIGH, CRITICAL
-Allowed payout_percent values:
-0, 25, 50, 75, 100
-Allowed gate result values:
-PASSED, FAILED, PARTIAL, UNCLEAR, NOT_APPLICABLE
-Required gates:
-POLICY_ACTIVE
-EVENT_COVERED
-THRESHOLD_MET
-NO_EXCLUSION
-EVENT_EVIDENCE_SUPPORTED
-RECEIPTS_SUPPORTED
-FILED_IN_WINDOW
-REASONABLE_ACTIONS
-Allowed reason_codes:
-POLICY_ACTIVE_CONFIRMED
-POLICY_DATE_UNCLEAR
-EVENT_TYPE_COVERED
-EVENT_TYPE_NOT_COVERED
-EXCLUSION_TRIGGERED
-NO_EXCLUSION_FOUND
-INSUFFICIENT_EVENT_EVIDENCE
-EVENT_EVIDENCE_ACCEPTED
-INSUFFICIENT_RECEIPTS
-RECEIPTS_ACCEPTED
-CLAIM_FILED_LATE
-CLAIM_FILED_IN_WINDOW
-AMOUNT_EXCEEDS_POLICY_LIMIT
-PARTIAL_DOCUMENTATION
-CONTRADICTORY_TIMELINE
-TRAVELLER_ACTED_REASONABLY
-TRAVELLER_DID_NOT_MITIGATE_LOSS
-AMBIGUOUS_POLICY_LANGUAGE
-HUMAN_REVIEW_RECOMMENDED
+        context = (
+            "POLICY JSON:\n" + policy_raw +
+            "\nCLAIM JSON:\n" + claim_raw +
+            "\nEVIDENCE JSON ARRAY:\n" + evidence_raw +
+            "\nTIMELINE JSON ARRAY:\n" + timeline_raw
+        )
+        def fn() -> str:
+            return context
+        raw = gl.eq_principle.prompt_non_comparative(
+            fn,
+            task="""You are a travel insurance claim review panel. Produce a STABLE CONSENSUS VERDICT as STRICT JSON ONLY, using only the bounded enum values below. No prose, no exact confidence scores, no timestamps, no model names.
+Allowed decision values: APPROVED, PARTIALLY_APPROVED, REJECTED, NEEDS_MORE_EVIDENCE, ESCALATE.
+Allowed coverage_status values: COVERED, COVERED_WITH_LIMITS, NOT_COVERED, UNCLEAR, EXCLUDED.
+Allowed confidence_band values: LOW, MEDIUM, HIGH.
+Allowed risk_level values: LOW, MEDIUM, HIGH, CRITICAL.
+Allowed payout_percent values: 0, 25, 50, 75, 100.
+Allowed gate result values: PASSED, FAILED, PARTIAL, UNCLEAR, NOT_APPLICABLE.
+Required gates (all must appear): POLICY_ACTIVE, EVENT_COVERED, THRESHOLD_MET, NO_EXCLUSION, EVENT_EVIDENCE_SUPPORTED, RECEIPTS_SUPPORTED, FILED_IN_WINDOW, REASONABLE_ACTIONS.
+Allowed reason_codes: POLICY_ACTIVE_CONFIRMED, POLICY_DATE_UNCLEAR, EVENT_TYPE_COVERED, EVENT_TYPE_NOT_COVERED, EXCLUSION_TRIGGERED, NO_EXCLUSION_FOUND, INSUFFICIENT_EVENT_EVIDENCE, EVENT_EVIDENCE_ACCEPTED, INSUFFICIENT_RECEIPTS, RECEIPTS_ACCEPTED, CLAIM_FILED_LATE, CLAIM_FILED_IN_WINDOW, AMOUNT_EXCEEDS_POLICY_LIMIT, PARTIAL_DOCUMENTATION, CONTRADICTORY_TIMELINE, TRAVELLER_ACTED_REASONABLY, TRAVELLER_DID_NOT_MITIGATE_LOSS, AMBIGUOUS_POLICY_LANGUAGE, HUMAN_REVIEW_RECOMMENDED.
 Decision rules:
 - If the event is covered and evidence supports the full amount, choose APPROVED.
 - If only part of the amount is supported or policy limits apply, choose PARTIALLY_APPROVED.
 - If the event is clearly not covered or an exclusion is triggered, choose REJECTED.
 - If material evidence is missing, choose NEEDS_MORE_EVIDENCE.
 - If the policy or facts are too ambiguous for automated review, choose ESCALATE.
-- APPROVED should usually use payout_percent 100.
-- PARTIALLY_APPROVED should use payout_percent 25, 50, or 75.
-- REJECTED should use payout_percent 0.
-- NEEDS_MORE_EVIDENCE should use payout_percent 0.
-- ESCALATE should use payout_percent 0.
-POLICY JSON:
-{policy_raw}
-CLAIM JSON:
-{claim_raw}
-EVIDENCE JSON ARRAY:
-{evidence_raw}
-TIMELINE JSON ARRAY:
-{timeline_raw}
+- APPROVED -> payout_percent 100. PARTIALLY_APPROVED -> 25/50/75. REJECTED / NEEDS_MORE_EVIDENCE / ESCALATE -> 0.
 Return STRICT JSON ONLY with this exact shape:
-{{
+{
   "decision": "APPROVED",
   "coverage_status": "COVERED",
   "payout_percent": 100,
   "confidence_band": "HIGH",
   "risk_level": "LOW",
-  "gates": {{
+  "gates": {
     "POLICY_ACTIVE": "PASSED",
     "EVENT_COVERED": "PASSED",
     "THRESHOLD_MET": "PASSED",
@@ -370,17 +327,12 @@ Return STRICT JSON ONLY with this exact shape:
     "RECEIPTS_SUPPORTED": "PASSED",
     "FILED_IN_WINDOW": "PASSED",
     "REASONABLE_ACTIONS": "PASSED"
-  }},
+  },
   "reason_codes": ["POLICY_ACTIVE_CONFIRMED", "EVENT_TYPE_COVERED"]
-}}
-"""
-        def run() -> str:
-            return gl.nondet.exec_prompt(prompt).strip()
-        raw = gl.eq_principle.prompt_non_comparative(
-            run,
-            """
-Accept the leader output only if it is valid strict JSON and it is a reasonable bounded travel-insurance claim verdict.
-Validation criteria:
+}
+""",
+            criteria="""
+Accept the leader output only if it is valid strict JSON and a reasonable bounded travel-insurance claim verdict, judged against the input policy/claim/evidence/timeline.
 - decision must be one of: APPROVED, PARTIALLY_APPROVED, REJECTED, NEEDS_MORE_EVIDENCE, ESCALATE.
 - coverage_status must be one of: COVERED, COVERED_WITH_LIMITS, NOT_COVERED, UNCLEAR, EXCLUDED.
 - payout_percent must be one of: 0, 25, 50, 75, 100.
@@ -388,10 +340,8 @@ Validation criteria:
 - risk_level must be one of: LOW, MEDIUM, HIGH, CRITICAL.
 - all required gate results must be present and must use only allowed gate enum values.
 - reason_codes must come from the allowed reason code list.
-- the decision must be consistent with the policy, claim, evidence, timeline, gates, and payout_percent.
-- APPROVED should normally have payout_percent 100.
-- PARTIALLY_APPROVED should have payout_percent 25, 50, or 75.
-- REJECTED, NEEDS_MORE_EVIDENCE, and ESCALATE should have payout_percent 0.
+- decision must be consistent with the policy, claim, evidence, timeline, gates, and payout_percent.
+- APPROVED should normally have payout_percent 100. PARTIALLY_APPROVED -> 25/50/75. REJECTED/NEEDS_MORE_EVIDENCE/ESCALATE -> 0.
 - reject malformed JSON, invented enum values, contradictory verdicts, unsupported approval, or unsupported rejection.
 - do not reject only because another valid review could have used slightly different reason_codes or gate wording.
 """,
@@ -473,65 +423,34 @@ Validation criteria:
         evidence_raw = self.claim_evidence.get(claim_id, "[]")
         policy_raw = self.policies.get(claim.get("policyId", ""), "{}")
         claimed_amount = self._get_claimed_amount(claim)
-        prompt = f"""You are reviewing a dispute against a prior travel insurance claim decision.
-Produce a bounded consensus dispute verdict.
-Do not write long prose.
-Do not use exact confidence scores.
-Do not invent enum values.
-Use only the allowed values below.
-Allowed dispute_decision values:
-ORIGINAL_DECISION_UPHELD
-ORIGINAL_DECISION_ADJUSTED
-MORE_EVIDENCE_REQUIRED
-ESCALATE_TO_HUMAN_ARBITRATION
-DISPUTE_REJECTED
-Allowed new_claim_decision values:
-APPROVED
-PARTIALLY_APPROVED
-REJECTED
-NEEDS_MORE_EVIDENCE
-ESCALATE
-Allowed payout_percent values:
-0, 25, 50, 75, 100
-Allowed confidence_band values:
-LOW, MEDIUM, HIGH
-Allowed reason_codes:
-ORIGINAL_REVIEW_REASONABLE
-ORIGINAL_REVIEW_UNSUPPORTED
-NEW_EVIDENCE_MATERIAL
-NEW_EVIDENCE_NOT_MATERIAL
-DISPUTE_ARGUMENT_ACCEPTED
-DISPUTE_ARGUMENT_REJECTED
-POLICY_INTERPRETATION_CHANGED
-AMOUNT_SHOULD_CHANGE
-MORE_EVIDENCE_NEEDED
-HUMAN_ARBITRATION_RECOMMENDED
-POLICY JSON:
-{policy_raw}
-CLAIM JSON:
-{claim_raw}
-ORIGINAL REVIEW JSON:
-{review_raw}
-EVIDENCE JSON ARRAY:
-{evidence_raw}
-DISPUTE JSON:
-{dispute_raw}
+        context = (
+            "POLICY JSON:\n" + policy_raw +
+            "\nCLAIM JSON:\n" + claim_raw +
+            "\nORIGINAL REVIEW JSON:\n" + review_raw +
+            "\nEVIDENCE JSON ARRAY:\n" + evidence_raw +
+            "\nDISPUTE JSON:\n" + dispute_raw
+        )
+        def fn() -> str:
+            return context
+        raw = gl.eq_principle.prompt_non_comparative(
+            fn,
+            task="""You are reviewing a dispute against a prior travel insurance claim decision. Produce a bounded consensus dispute verdict as STRICT JSON ONLY. No long prose, no exact confidence scores, no invented enum values.
+Allowed dispute_decision values: ORIGINAL_DECISION_UPHELD, ORIGINAL_DECISION_ADJUSTED, MORE_EVIDENCE_REQUIRED, ESCALATE_TO_HUMAN_ARBITRATION, DISPUTE_REJECTED.
+Allowed new_claim_decision values: APPROVED, PARTIALLY_APPROVED, REJECTED, NEEDS_MORE_EVIDENCE, ESCALATE.
+Allowed payout_percent values: 0, 25, 50, 75, 100.
+Allowed confidence_band values: LOW, MEDIUM, HIGH.
+Allowed reason_codes: ORIGINAL_REVIEW_REASONABLE, ORIGINAL_REVIEW_UNSUPPORTED, NEW_EVIDENCE_MATERIAL, NEW_EVIDENCE_NOT_MATERIAL, DISPUTE_ARGUMENT_ACCEPTED, DISPUTE_ARGUMENT_REJECTED, POLICY_INTERPRETATION_CHANGED, AMOUNT_SHOULD_CHANGE, MORE_EVIDENCE_NEEDED, HUMAN_ARBITRATION_RECOMMENDED.
 Return STRICT JSON ONLY:
-{{
+{
   "dispute_decision": "ORIGINAL_DECISION_UPHELD",
   "new_claim_decision": "REJECTED",
   "payout_percent": 0,
   "confidence_band": "HIGH",
   "reason_codes": ["ORIGINAL_REVIEW_REASONABLE"]
-}}
-"""
-        def run() -> str:
-            return gl.nondet.exec_prompt(prompt).strip()
-        raw = gl.eq_principle.prompt_non_comparative(
-            run,
-            """
-Accept the leader output only if it is valid strict JSON and it is a reasonable bounded dispute review.
-Validation criteria:
+}
+""",
+            criteria="""
+Accept the leader output only if it is valid strict JSON and a reasonable bounded dispute review, judged against the input policy/claim/original review/evidence/dispute.
 - dispute_decision must be one of the allowed dispute decision enums.
 - new_claim_decision must be one of the allowed claim decision enums.
 - payout_percent must be one of: 0, 25, 50, 75, 100.
@@ -592,39 +511,27 @@ Validation criteria:
         evidence_raw = self.claim_evidence.get(claim_id, "[]")
         timeline_raw = self.claim_timelines.get(claim_id, "[]")
         claim_raw = self.claims[claim_id]
-        prompt = f"""Identify only major evidence conflicts for this insurance claim.
-Use bounded output.
-Do not write long prose.
-Do not invent severity values.
-Allowed severity values:
-LOW, MEDIUM, HIGH
-Conflict type values:
-TIMELINE_CONFLICT
-AMOUNT_CONFLICT
-MISSING_DOCUMENT
-IDENTITY_OR_POLICY_MISMATCH
-EVENT_DESCRIPTION_CONFLICT
-NO_MAJOR_CONFLICT
-CLAIM JSON:
-{claim_raw}
-EVIDENCE JSON ARRAY:
-{evidence_raw}
-TIMELINE JSON ARRAY:
-{timeline_raw}
+        context = (
+            "CLAIM JSON:\n" + claim_raw +
+            "\nEVIDENCE JSON ARRAY:\n" + evidence_raw +
+            "\nTIMELINE JSON ARRAY:\n" + timeline_raw
+        )
+        def fn() -> str:
+            return context
+        raw = gl.eq_principle.prompt_non_comparative(
+            fn,
+            task="""Identify only major evidence conflicts for this insurance claim. Bounded output. No prose. No invented enum values.
+Allowed severity: LOW, MEDIUM, HIGH.
+Conflict type values: TIMELINE_CONFLICT, AMOUNT_CONFLICT, MISSING_DOCUMENT, IDENTITY_OR_POLICY_MISMATCH, EVENT_DESCRIPTION_CONFLICT, NO_MAJOR_CONFLICT.
 Return STRICT JSON ONLY:
-{{
+{
   "has_conflict": false,
   "top_conflict_type": "NO_MAJOR_CONFLICT",
   "severity": "LOW"
-}}
-"""
-        def run() -> str:
-            return gl.nondet.exec_prompt(prompt).strip()
-        raw = gl.eq_principle.prompt_non_comparative(
-            run,
-            """
-Accept the leader output only if it is valid strict JSON and it is a reasonable bounded evidence-conflict assessment.
-Validation criteria:
+}
+""",
+            criteria="""
+Accept the leader output only if it is valid strict JSON and a reasonable bounded evidence-conflict assessment, judged against the input claim/evidence/timeline.
 - has_conflict must be a boolean.
 - top_conflict_type must be one of the allowed conflict types.
 - severity must be LOW, MEDIUM, or HIGH.
@@ -675,57 +582,27 @@ Validation criteria:
         claim = json.loads(claim_raw)
         policy_raw = self.policies.get(claim.get("policyId", ""), "{}")
         evidence_raw = self.claim_evidence.get(claim_id, "[]")
-        prompt = f"""Evaluate one policy gate against a travel insurance claim.
-Use bounded output only.
-Do not write long prose.
-Do not invent enum values.
-Gate to evaluate:
-{gate_name}
-Allowed result values:
-PASSED, FAILED, PARTIAL, UNCLEAR, NOT_APPLICABLE
-Allowed confidence_band values:
-LOW, MEDIUM, HIGH
-Allowed reason_codes:
-POLICY_ACTIVE_CONFIRMED
-POLICY_DATE_UNCLEAR
-EVENT_TYPE_COVERED
-EVENT_TYPE_NOT_COVERED
-EXCLUSION_TRIGGERED
-NO_EXCLUSION_FOUND
-INSUFFICIENT_EVENT_EVIDENCE
-EVENT_EVIDENCE_ACCEPTED
-INSUFFICIENT_RECEIPTS
-RECEIPTS_ACCEPTED
-CLAIM_FILED_LATE
-CLAIM_FILED_IN_WINDOW
-AMOUNT_EXCEEDS_POLICY_LIMIT
-PARTIAL_DOCUMENTATION
-CONTRADICTORY_TIMELINE
-TRAVELLER_ACTED_REASONABLY
-TRAVELLER_DID_NOT_MITIGATE_LOSS
-AMBIGUOUS_POLICY_LANGUAGE
-HUMAN_REVIEW_RECOMMENDED
-POLICY JSON:
-{policy_raw}
-CLAIM JSON:
-{claim_raw}
-EVIDENCE JSON ARRAY:
-{evidence_raw}
-Return STRICT JSON ONLY:
-{{
-  "gate": "{gate_name}",
-  "result": "PASSED",
-  "confidence_band": "HIGH",
-  "reason_codes": ["POLICY_ACTIVE_CONFIRMED"]
-}}
-"""
-        def run() -> str:
-            return gl.nondet.exec_prompt(prompt).strip()
+        context = (
+            "GATE NAME:\n" + gate_name +
+            "\nPOLICY JSON:\n" + policy_raw +
+            "\nCLAIM JSON:\n" + claim_raw +
+            "\nEVIDENCE JSON ARRAY:\n" + evidence_raw
+        )
+        def fn() -> str:
+            return context
+        gate_task = (
+            "Evaluate the single policy gate named in the input against the policy, claim, and evidence. "
+            "Bounded output. No prose. No invented enum values.\n"
+            "Allowed result values: PASSED, FAILED, PARTIAL, UNCLEAR, NOT_APPLICABLE.\n"
+            "Allowed confidence_band values: LOW, MEDIUM, HIGH.\n"
+            "Allowed reason_codes: POLICY_ACTIVE_CONFIRMED, POLICY_DATE_UNCLEAR, EVENT_TYPE_COVERED, EVENT_TYPE_NOT_COVERED, EXCLUSION_TRIGGERED, NO_EXCLUSION_FOUND, INSUFFICIENT_EVENT_EVIDENCE, EVENT_EVIDENCE_ACCEPTED, INSUFFICIENT_RECEIPTS, RECEIPTS_ACCEPTED, CLAIM_FILED_LATE, CLAIM_FILED_IN_WINDOW, AMOUNT_EXCEEDS_POLICY_LIMIT, PARTIAL_DOCUMENTATION, CONTRADICTORY_TIMELINE, TRAVELLER_ACTED_REASONABLY, TRAVELLER_DID_NOT_MITIGATE_LOSS, AMBIGUOUS_POLICY_LANGUAGE, HUMAN_REVIEW_RECOMMENDED.\n"
+            "Return STRICT JSON ONLY: {\"gate\": \"" + gate_name + "\", \"result\": \"PASSED\", \"confidence_band\": \"HIGH\", \"reason_codes\": [\"POLICY_ACTIVE_CONFIRMED\"]}"
+        )
         raw = gl.eq_principle.prompt_non_comparative(
-            run,
-            """
-Accept the leader output only if it is valid strict JSON and it is a reasonable bounded policy-gate interpretation.
-Validation criteria:
+            fn,
+            task=gate_task,
+            criteria="""
+Accept the leader output only if it is valid strict JSON and a reasonable bounded policy-gate interpretation, judged against the input gate name, policy, claim, and evidence.
 - gate must match the requested gate.
 - result must be PASSED, FAILED, PARTIAL, UNCLEAR, or NOT_APPLICABLE.
 - confidence_band must be LOW, MEDIUM, or HIGH.

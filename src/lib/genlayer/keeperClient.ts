@@ -93,14 +93,16 @@ export async function listAllClaimIds(client: any, address: `0x${string}`): Prom
   } catch { return []; }
 }
 
+/**
+ * Fire-and-forget judge_claim. We do NOT await consensus inside the API route —
+ * Vercel serverless functions time out at 10s (Hobby) or 60s (Pro) and GenLayer
+ * nondet consensus often takes 30s+. We submit the tx, return the hash, and let
+ * the chain finish asynchronously. cron-job.org will skip the claim on its next
+ * tick once get_claim_review() returns a non-empty review.
+ */
 export async function judgeClaim(client: any, address: `0x${string}`, claimId: string): Promise<string> {
   const txHash: any = await client.writeContract({
     address, functionName: "judge_claim", args: [claimId], value: BigInt(0),
   });
-  const hash = typeof txHash === "string" ? txHash : (txHash?.hash ?? "");
-  const { TransactionStatus } = await import("genlayer-js/types");
-  await client.waitForTransactionReceipt({
-    hash, status: TransactionStatus.ACCEPTED, retries: 80, interval: 3000, fullTransaction: false,
-  });
-  return hash;
+  return typeof txHash === "string" ? txHash : (txHash?.hash ?? "");
 }
